@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dall'Impianto Combustibile al Motore Turbofan - Infografica Interattiva</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #1e3a5f;
+            --secondary-blue: #2d5a87;
+            --accent-orange: #e67e22;
+            --accent-gold: #f39c12;
+            --light-bg: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --success-green: #27ae60;
+            --danger-red: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            color: white;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header h1 span {
+            color: var(--accent-gold);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Turbofan SVG Header */
+        .turbofan-header {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            padding: 20px 0;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent-orange), var(--accent-gold));
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .card-number {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-gold));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .card h3 {
+            color: var(--primary-blue);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            padding-right: 50px;
+        }
+
+        .card p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .card-icon {
+            margin-bottom: 15px;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            background: var(--light-bg);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--secondary-blue);
+        }
+
+        .click-hint {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            color: var(--accent-orange);
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover .click-hint {
+            opacity: 1;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalSlideIn 0.4s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            padding: 30px;
+            border-radius: 20px 20px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modal-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .modal-header p {
+            opacity: 0.9;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.4);
+            transform: rotate(90deg);
+        }
+
+        .modal-content {
+            padding: 30px;
+        }
+
+        .modal-section {
+            margin-bottom: 30px;
+        }
+
+        .modal-section h3 {
+            color: var(--primary-blue);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-orange);
+        }
+
+        .modal-section h4 {
+            color: var(--secondary-blue);
+            font-size: 1.1rem;
+            margin: 20px 0 10px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-left: 4px solid var(--accent-orange);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
+            font-family: 'Cambria Math', 'Times New Roman', serif;
+        }
+
+        .formula-box .formula {
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .formula-box .description {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 10px;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .example-box h5 {
+            color: var(--success-green);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .info-item {
+            background: var(--light-bg);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .info-item .label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .info-item .value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        /* SVG Diagram Styles */
+        .diagram-container {
+            background: var(--light-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .diagram-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Interactive Calculator */
+        .calculator-section {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .calculator-section h4 {
+            color: var(--accent-orange);
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-field label {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .input-field input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .input-field input:focus {
+            outline: none;
+            border-color: var(--accent-orange);
+        }
+
+        .calc-btn {
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-gold));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .calc-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(230, 126, 34, 0.3);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .result-item .label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .result-item .value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        /* List Styles */
+        .styled-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .styled-list li {
+            padding: 10px 0 10px 30px;
+            position: relative;
+            border-bottom: 1px solid #eee;
+        }
+
+        .styled-list li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent-orange);
+            font-weight: bold;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .comparison-table th {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .comparison-table tr:hover {
+            background: var(--light-bg);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: white;
+            opacity: 0.8;
+        }
+
+        .footer-icons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .footer-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scroll animations */
+        .card {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+        .card:nth-child(5) { animation-delay: 0.5s; }
+        .card:nth-child(6) { animation-delay: 0.6s; }
+        .card:nth-child(7) { animation-delay: 0.7s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Progress indicator */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-orange), var(--accent-gold));
+            z-index: 9999;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="container">
+        <header>
+            <div class="turbofan-header">
+                <svg width="200" height="80" viewBox="0 0 200 80">
+                    <!-- Simplified Turbofan Engine -->
+                    <defs>
+                        <linearGradient id="engineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#4a4a4a"/>
+                            <stop offset="50%" style="stop-color:#7a7a7a"/>
+                            <stop offset="100%" style="stop-color:#5a5a5a"/>
+                        </linearGradient>
+                        <linearGradient id="flameGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#ff6b35"/>
+                            <stop offset="100%" style="stop-color:#f7c435"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Inlet -->
+                    <ellipse cx="25" cy="40" rx="20" ry="35" fill="url(#engineGrad)" stroke="#333" stroke-width="2"/>
+                    <!-- Fan blades -->
+                    <g transform="translate(25,40)">
+                        <line x1="0" y1="-25" x2="0" y2="25" stroke="#ddd" stroke-width="3"/>
+                        <line x1="-20" y1="-15" x2="20" y2="15" stroke="#ddd" stroke-width="3"/>
+                        <line x1="-20" y1="15" x2="20" y2="-15" stroke="#ddd" stroke-width="3"/>
+                    </g>
+                    <!-- Core -->
+                    <rect x="45" y="20" width="100" height="40" rx="5" fill="url(#engineGrad)" stroke="#333" stroke-width="2"/>
+                    <!-- Combustion chamber glow -->
+                    <rect x="80" y="25" width="30" height="30" rx="3" fill="url(#flameGrad)" opacity="0.8"/>
+                    <!-- Exhaust -->
+                    <polygon points="145,20 175,15 175,65 145,60" fill="url(#engineGrad)" stroke="#333" stroke-width="2"/>
+                    <!-- Exhaust flame -->
+                    <ellipse cx="185" cy="40" rx="12" ry="20" fill="url(#flameGrad)" opacity="0.7">
+                        <animate attributeName="rx" values="12;15;12" dur="0.5s" repeatCount="indefinite"/>
+                    </ellipse>
+                </svg>
+            </div>
+            <h1>DALL'IMPIANTO DI COMBUSTIBILE <span>AL MOTORE TURBOFAN</span></h1>
+            <p>Infografica Interattiva - Clicca su ogni sezione per approfondire</p>
+        </header>
+
+        <div class="cards-grid">
+            <!-- Card 1: Impianto Combustibile -->
+            <div class="card" data-modal="modal1">
+                <span class="card-number">1</span>
+                <div class="card-icon">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <rect x="10" y="15" width="40" height="30" rx="3" fill="#3498db" opacity="0.3"/>
+                        <rect x="12" y="17" width="36" height="26" rx="2" fill="none" stroke="#3498db" stroke-width="2"/>
+                        <line x1="30" y1="43" x2="30" y2="55" stroke="#e67e22" stroke-width="3"/>
+                        <circle cx="30" cy="55" r="4" fill="#e67e22"/>
+                        <path d="M20 30 Q30 20 40 30" fill="none" stroke="#3498db" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h3>Impianto di Combustibile del Velivolo</h3>
+                <p>L'impianto combustibile ha tre funzioni principali: immagazzinare il carburante, alimentare continuamente il motore, garantire sicurezza e continuità di funzionamento.</p>
+                <div class="card-tags">
+                    <span class="tag">Serbatoi</span>
+                    <span class="tag">Pompe</span>
+                    <span class="tag">Filtri</span>
+                </div>
+                <span class="click-hint">Clicca per approfondire →</span>
+            </div>
+
+            <!-- Card 2: Combustibili Aeronautici -->
+            <div class="card" data-modal="modal2">
+                <span class="card-number">2</span>
+                <div class="card-icon">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <path d="M20 50 L25 10 L35 10 L40 50 Z" fill="#f39c12" opacity="0.3"/>
+                        <path d="M20 50 L25 10 L35 10 L40 50 Z" fill="none" stroke="#f39c12" stroke-width="2"/>
+                        <ellipse cx="30" cy="35" rx="8" ry="4" fill="#e67e22"/>
+                        <text x="30" y="58" text-anchor="middle" fill="#2c3e50" font-size="8" font-weight="bold">JET A-1</text>
+                    </svg>
+                </div>
+                <h3>Combustibili Aeronautici</h3>
+                <p>Nei motori a turbina si utilizzano combustibili liquidi ad alte prestazioni. Il Jet A-1 (cherosene aeronautico) è lo standard per l'aviazione civile.</p>
+                <div class="card-tags">
+                    <span class="tag">Jet A-1</span>
+                    <span class="tag">SAF</span>
+                    <span class="tag">ASTM D1655</span>
+                </div>
+                <span class="click-hint">Clicca per approfondire →</span>
+            </div>
+
+            <!-- Card 3: Combustione nel Turbofan -->
+            <div class="card" data-modal="modal3">
+                <span class="card-number">3</span>
+                <div class="card-icon">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <defs>
+                            <linearGradient id="flame" x1="0%" y1="100%" x2="0%" y2="0%">
+                                <stop offset="0%" style="stop-color:#e74c3c"/>
+                                <stop offset="50%" style="stop-color:#f39c12"/>
+                                <stop offset="100%" style="stop-color:#f1c40f"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M30 55 Q15 40 20 25 Q25 35 30 20 Q35 35 40 25 Q45 40 30 55" fill="url(#flame)"/>
+                        <circle cx="30" cy="45" r="8" fill="#e74c3c" opacity="0.5"/>
+                    </svg>
+                </div>
+                <h3>Combustione nel Turbofan</h3>
+                <p>La combustione è una reazione chimica esotermica che avviene in modo continuo e quasi a pressione costante. Il cherosene nebulizzato si miscela con l'aria compressa.</p>
+                <div class="card-tags">
+                    <span class="tag">Reazione Esotermica</span>
+                    <span class="tag">CO₂ + H₂O</span>
+                </div>
+                <span class="click-hint">Clicca per approfondire →</span>
+            </div>
+
+            <!-- Card 4: Camera di Combustione -->
+            <div class="card" data-modal="modal4">
+                <span class="card-number">4</span>
+                <div class="card-icon">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <rect x="5" y="20" width="50" height="20" rx="10" fill="#9b59b6" opacity="0.3"/>
+                        <rect x="5" y="20" width="50" height="20" rx="10" fill="none" stroke="#9b59b6" stroke-width="2"/>
+                        <circle cx="15" cy="30" r="4" fill="#e74c3c"/>
+                        <circle cx="30" cy="30" r="4" fill="#f39c12"/>
+                        <circle cx="45" cy="30" r="4" fill="#3498db"/>
+                        <text x="15" y="50" fill="#9b59b6" font-size="6">PRI</text>
+                        <text x="27" y="50" fill="#9b59b6" font-size="6">INT</text>
+                        <text x="42" y="50" fill="#9b59b6" font-size="6">DIL</text>
+                    </svg>
+                </div>
+                <h3>Camera di Combustione del Turbofan</h3>
+                <p>La camera di combustione ha il compito di aumentare la temperatura dei gas prima della turbina garantendo stabilità della fiamma e alte efficienze.</p>
+                <div class="card-tags">
+                    <span class="tag">Diffusore</span>
+                    <span class="tag">Liner</span>
+                    <span class="tag">Swirler</span>
+                </div>
+                <span class="click-hint">Clicca per approfondire →</span>
+            </div>
+
+            <!-- Card 5: Funzionamento Motore Turbofan -->
+            <div class="card" data-modal="modal5">
+                <span class="card-number">5</span>
+                <div class="card-icon">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <ellipse cx="10" cy="30" rx="8" ry="20" fill="#1abc9c" opacity="0.3" stroke="#1abc9c" stroke-width="2"/>
+                        <rect x="18" y="15" width="30" height="30" fill="#1abc9c" opacity="0.3" stroke="#1abc9c" stroke-width="2"/>
+                        <polygon points="48,15 58,10 58,50 48,45" fill="#1abc9c" opacity="0.3" stroke="#1abc9c" stroke-width="2"/>
+                        <text x="30" y="55" text-anchor="middle" fill="#1abc9c" font-size="7" font-weight="bold">BRAYTON</text>
+                    </svg>
+                </div>
+                <h3>Motore Turbofan: Funzionamento</h3>
+                <p>Il turbofan funziona secondo il ciclo Brayton (o Joule). L'aria entra, viene compressa, brucia con il combustibile, e i gas espulsi generano la spinta propulsiva.</p>
+                <div class="card-tags">
+                    <span class="tag">Ciclo Brayton</span>
+                    <span class="tag">PV = nRT</span>
+                    <span class="tag">Bypass</span>
+                </div>
+                <span class="click-hint">Clicca per approfondire →</span>
+            </div>
+
+            <!-- Card 6: Impiego e Vantaggi -->
+            <div class="card" data-modal="modal6">
+                <span class="card-number">6</span>
+                <div class="card-icon">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <path d="M30 5 L35 25 L55 25 L40 38 L45 55 L30 45 L15 55 L20 38 L5 25 L25 25 Z" fill="#f1c40f" opacity="0.3" stroke="#f1c40f" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h3>Impiego Aeronautico e Vantaggi</h3>
+                <p>Il turbofan è il motore principale nell'aviazione civile. Ideale per voli a medio e lungo raggio grazie all'elevata efficienza propulsiva.</p>
+                <div class="card-tags">
+                    <span class="tag">Boeing 737</span>
+                    <span class="tag">Airbus A320</span>
+                    <span class="tag">Efficienza</span>
+                </div>
+                <span class="click-hint">Clicca per approfondire →</span>
+            </div>
+
+            <!-- Card 7: Conclusione -->
+            <div class="card" data-modal="modal7">
+                <span class="card-number">7</span>
+                <div class="card-icon">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <circle cx="30" cy="30" r="25" fill="#27ae60" opacity="0.2" stroke="#27ae60" stroke-width="2"/>
+                        <path d="M20 30 L27 37 L42 22" fill="none" stroke="#27ae60" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3>Conclusione</h3>
+                <p>Il motore turbofan rappresenta oggi il sistema propulsivo più utilizzato nell'aviazione civile grazie all'integrazione tra impianto combustibile, combustione controllata e camera di combustione avanzata.</p>
+                <div class="card-tags">
+                    <span class="tag">Integrazione</span>
+                    <span class="tag">Futuro</span>
+                </div>
+                <span class="click-hint">Clicca per approfondire →</span>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-icons">
+                <div class="footer-icon">
+                    <svg width="30" height="30" viewBox="0 0 30 30">
+                        <path d="M15 3 L17 10 L25 10 L19 15 L21 23 L15 18 L9 23 L11 15 L5 10 L13 10 Z" fill="#f39c12"/>
+                    </svg>
+                    <span>Sicurezza</span>
+                </div>
+                <div class="footer-icon">
+                    <svg width="30" height="30" viewBox="0 0 30 30">
+                        <circle cx="15" cy="15" r="12" fill="none" stroke="#3498db" stroke-width="2"/>
+                        <path d="M15 5 L15 15 L22 15" fill="none" stroke="#3498db" stroke-width="2"/>
+                    </svg>
+                    <span>Efficienza</span>
+                </div>
+                <div class="footer-icon">
+                    <svg width="30" height="30" viewBox="0 0 30 30">
+                        <path d="M5 25 Q15 5 25 25" fill="none" stroke="#e74c3c" stroke-width="2"/>
+                        <circle cx="15" cy="12" r="4" fill="#e74c3c"/>
+                    </svg>
+                    <span>Innovazione</span>
+                </div>
+                <div class="footer-icon">
+                    <svg width="30" height="30" viewBox="0 0 30 30">
+                        <circle cx="15" cy="15" r="10" fill="none" stroke="#27ae60" stroke-width="2"/>
+                        <path d="M10 15 Q15 10 20 15 Q15 20 10 15" fill="#27ae60"/>
+                    </svg>
+                    <span>Sostenibilità</span>
+                </div>
+            </div>
+            <p style="margin-top: 20px;">Tecnologia che ci spinge nel futuro</p>
+        </footer>
+    </div>
+
+    <!-- MODAL 1: Impianto Combustibile -->
+    <div class="modal-overlay" id="modal1">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="close-btn" onclick="closeModal('modal1')">×</button>
+                <h2>1. Impianto di Combustibile del Velivolo</h2>
+                <p>Sistema completo per lo stoccaggio e la distribuzione del carburante</p>
+            </div>
+            <div class="modal-content">
+                <div class="modal-section">
+                    <h3>Definizione e Funzioni Principali</h3>
+                    <p>L'<strong>impianto combustibile</strong> è un sistema integrato che ha lo scopo di stivare il combustibile necessario e di portarlo ai motori nelle condizioni di pressione e portata richieste. Le sue tre funzioni fondamentali sono:</p>
+                    <ul class="styled-list">
+                        <li><strong>Immagazzinare il carburante</strong> - Stoccaggio sicuro in serbatoi dedicati</li>
+                        <li><strong>Alimentare continuamente il motore</strong> - Garantire flusso costante in tutte le condizioni</li>
+                        <li><strong>Garantire sicurezza e continuità di funzionamento</strong> - Ridondanza e protezioni</li>
+                    </ul>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Schema dell'Impianto</h3>
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 600 300" width="100%" height="250">
+                            <!-- Serbatoi -->
+                            <rect x="20" y="50" width="100" height="80" rx="10" fill="#3498db" opacity="0.3" stroke="#3498db" stroke-width="2"/>
+                            <text x="70" y="95" text-anchor="middle" fill="#2c3e50" font-size="12" font-weight="bold">SERBATOI</text>
+                            <text x="70" y="115" text-anchor="middle" fill="#7f8c8d" font-size="9">(ali - fusoliera)</text>
+                            
+                            <!-- Pompe -->
+                            <circle cx="180" cy="90" r="30" fill="#e67e22" opacity="0.3" stroke="#e67e22" stroke-width="2"/>
+                            <text x="180" y="85" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">POMPE</text>
+                            <text x="180" y="100" text-anchor="middle" fill="#7f8c8d" font-size="8">CARBURANTE</text>
+                            
+                            <!-- Filtri -->
+                            <rect x="240" y="60" width="60" height="60" rx="5" fill="#9b59b6" opacity="0.3" stroke="#9b59b6" stroke-width="2"/>
+                            <text x="270" y="95" text-anchor="middle" fill="#2c3e50" font-size="11" font-weight="bold">FILTRI</text>
+                            
+                            <!-- Valvole -->
+                            <polygon points="340,70 370,90 340,110" fill="#27ae60" opacity="0.3" stroke="#27ae60" stroke-width="2"/>
+                            <text x="355" y="130" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">VALVOLE</text>
+                            
+                            <!-- Tubazioni -->
+                            <rect x="400" y="70" width="80" height="40" rx="5" fill="#1abc9c" opacity="0.3" stroke="#1abc9c" stroke-width="2"/>
+                            <text x="440" y="95" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">TUBAZIONI</text>
+                            
+                            <!-- Sistema di controllo -->
+                            <rect x="500" y="50" width="80" height="80" rx="10" fill="#e74c3c" opacity="0.3" stroke="#e74c3c" stroke-width="2"/>
+                            <text x="540" y="85" text-anchor="middle" fill="#2c3e50" font-size="9" font-weight="bold">SISTEMA</text>
+                            <text x="540" y="100" text-anchor="middle" fill="#2c3e50" font-size="9" font-weight="bold">CONTROLLO</text>
+                            <text x="540" y="115" text-anchor="middle" fill="#7f8c8d" font-size="8">DEL FLUSSO</text>
+                            
+                            <!-- Frecce di collegamento -->
+                            <path d="M120 90 L150 90" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+                            <path d="M210 90 L240 90" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+                            <path d="M300 90 L340 90" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+                            <path d="M370 90 L400 90" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+                            <path d="M480 90 L500 90" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+                            
+                            <!-- Motore turbofan -->
+                            <ellipse cx="300" cy="220" rx="80" ry="40" fill="#f39c12" opacity="0.2" stroke="#f39c12" stroke-width="2"/>
+                            <text x="300" y="215" text-anchor="middle" fill="#2c3e50" font-size="12" font-weight="bold">MOTORE</text>
+                            <text x="300" y="235" text-anchor="middle" fill="#2c3e50" font-size="12" font-weight="bold">TURBOFAN</text>
+                            
+                            <!-- Freccia verso motore -->
+                            <path d="M300 130 L300 180" stroke="#e67e22" stroke-width="3" stroke-dasharray="5,5"/>
+                            
+                            <defs>
+                                <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <path d="M0,0 L0,6 L9,3 z" fill="#2c3e50"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Tipologie di Serbatoi</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Descrizione</th>
+                                <th>Vantaggi</th>
+                                <th>Svantaggi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Integrali</strong></td>
+                                <td>Ricavati dalla struttura stessa dell'ala</td>
+                                <td>Peso ridotto</td>
+                                <td>Difficoltà di manutenzione</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Flessibili</strong></td>
+                                <td>Materiale sintetico in vano dedicato</td>
+                                <td>Non interferiscono con rigidezza</td>
+                                <td>Problemi di usura</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Rigidi</strong></td>
+                                <td>Componenti isolati in fusoliera</td>
+                                <td>Indipendenti dalla struttura</td>
+                                <td>Peso superiore</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Formule Fondamentali</h3>
+                    <div class="formula-box">
+                        <p><strong>Perdite di carico nel sistema:</strong></p>
+                        <p class="formula">ΔP = f × (L/D) × (ρv²/2)</p>
+                        <p class="description">Dove: f = fattore di attrito, L = lunghezza tubazione, D = diametro, ρ = densità, v = velocità</p>
+                    </div>
+                    <div class="formula-box">
+                        <p><strong>Portata volumetrica:</strong></p>
+                        <p class="formula">Q = A × v</p>
+                        <p class="description">Dove: Q = portata [m³/s], A = area sezione [m²], v = velocità fluido [m/s]</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h5>📌 Esempio Pratico: Boeing 737</h5>
+                    <p>Un Boeing 737-800 ha una <strong>capacità totale di circa 26.000 litri</strong> di Jet A-1, distribuiti in:</p>
+                    <ul>
+                        <li>Serbatoio alare sinistro: ~9.000 litri</li>
+                        <li>Serbatoio alare destro: ~9.000 litri</li>
+                        <li>Serbatoio centrale: ~8.000 litri</li>
+                    </ul>
+                    <p>Le pompe di alimentazione garantiscono una pressione di almeno <strong>10 psi</strong> all'ingresso dei motori CFM56.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Combustibili Aeronautici -->
+    <div class="modal-overlay" id="modal2">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="close-btn" onclick="closeModal('modal2')">×</button>
+                <h2>2. Combustibili Aeronautici</h2>
+                <p>Caratteristiche e tipologie dei carburanti per aviazione</p>
+            </div>
+            <div class="modal-content">
+                <div class="modal-section">
+                    <h3>Definizione Generale</h3>
+                    <p>I <strong>combustibili</strong> sono sostanze principalmente a base di carbonio e idrogeno, in grado di bruciare in presenza di ossigeno (comburente) sprigionando energia termica. La reazione chimica alla base di tale fenomeno è detta <strong>combustione</strong>.</p>
+                    <p>La qualità economica e industriale dipende principalmente dal <strong>potere calorifico</strong>, ovvero la quantità di calore sprigionata dalla combustione di un'unità di peso [kg] o di volume [m³].</p>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Jet A-1: Lo Standard Aeronautico</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="label">Densità energetica</div>
+                            <div class="value">~43 MJ/kg</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Punto di congelamento</div>
+                            <div class="value">-47°C</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Punto di infiammabilità</div>
+                            <div class="value">&gt;38°C</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Densità</div>
+                            <div class="value">775-840 kg/m³</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Classificazione dei Combustibili</h3>
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 500 200" width="100%" height="180">
+                            <!-- Solidi -->
+                            <rect x="20" y="30" width="140" height="140" rx="10" fill="#8e44ad" opacity="0.2" stroke="#8e44ad" stroke-width="2"/>
+                            <text x="90" y="55" text-anchor="middle" fill="#8e44ad" font-size="14" font-weight="bold">SOLIDI</text>
+                            <text x="90" y="80" text-anchor="middle" fill="#2c3e50" font-size="10">Legna</text>
+                            <text x="90" y="95" text-anchor="middle" fill="#2c3e50" font-size="10">Carboni fossili</text>
+                            <text x="90" y="110" text-anchor="middle" fill="#2c3e50" font-size="10">Coke</text>
+                            <text x="90" y="130" text-anchor="middle" fill="#7f8c8d" font-size="9">[kcal/kg]</text>
+                            
+                            <!-- Liquidi -->
+                            <rect x="180" y="30" width="140" height="140" rx="10" fill="#e67e22" opacity="0.2" stroke="#e67e22" stroke-width="2"/>
+                            <text x="250" y="55" text-anchor="middle" fill="#e67e22" font-size="14" font-weight="bold">LIQUIDI</text>
+                            <text x="250" y="80" text-anchor="middle" fill="#2c3e50" font-size="10">Petrolio greggio</text>
+                            <text x="250" y="95" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">Jet A-1 ✈</text>
+                            <text x="250" y="110" text-anchor="middle" fill="#2c3e50" font-size="10">Benzina, Gasolio</text>
+                            <text x="250" y="130" text-anchor="middle" fill="#7f8c8d" font-size="9">[kcal/m³]</text>
+                            
+                            <!-- Gassosi -->
+                            <rect x="340" y="30" width="140" height="140" rx="10" fill="#3498db" opacity="0.2" stroke="#3498db" stroke-width="2"/>
+                            <text x="410" y="55" text-anchor="middle" fill="#3498db" font-size="14" font-weight="bold">GASSOSI</text>
+                            <text x="410" y="80" text-anchor="middle" fill="#2c3e50" font-size="10">Gas naturale</text>
+                            <text x="410" y="95" text-anchor="middle" fill="#2c3e50" font-size="10">GPL</text>
+                            <text x="410" y="110" text-anchor="middle" fill="#2c3e50" font-size="10">Idrogeno</text>
+                            <text x="410" y="130" text-anchor="middle" fill="#7f8c8d" font-size="9">[kcal/m³]</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>SAF - Sustainable Aviation Fuel</h3>
+                    <p>I combustibili sostenibili per aviazione rappresentano il futuro del settore:</p>
+                    <ul class="styled-list">
+                        <li><strong>Riduzione CO₂</strong> fino all'80% sul ciclo di vita</li>
+                        <li>Prodotti da fonti rinnovabili (rifiuti, oli vegetali)</li>
+                        <li>Compatibili con motori esistenti (drop-in)</li>
+                        <li>Conformi agli standard ASTM D7566</li>
+                    </ul>
+                </div>
+
+                <div class="formula-box">
+                    <p><strong>Potere calorifico inferiore (PCI) del Jet A-1:</strong></p>
+                    <p class="formula">PCI ≈ 43.000 kJ/kg = 43 MJ/kg</p>
+                    <p class="description">È la quantità di energia liberata dalla combustione completa di 1 kg di combustibile, senza considerare il calore di condensazione del vapore acqueo.</p>
+                </div>
+
+                <div class="example-box">
+                    <h5>📌 Esempio Pratico: Standard di Qualità</h5>
+                    <p>Prima del rifornimento, il Jet A-1 deve rispettare i requisiti <strong>AFQRJOS</strong> (Aviation Fuel Quality Requirements):</p>
+                    <ul>
+                        <li>Contenuto di zolfo: &lt; 0.3% in massa</li>
+                        <li>Acqua disciolta: &lt; 75 ppm</li>
+                        <li>Viscosità a -20°C: &lt; 8 mm²/s</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Combustione -->
+    <div class="modal-overlay" id="modal3">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="close-btn" onclick="closeModal('modal3')">×</button>
+                <h2>3. Combustione nel Turbofan</h2>
+                <p>La reazione chimica che genera la potenza propulsiva</p>
+            </div>
+            <div class="modal-content">
+                <div class="modal-section">
+                    <h3>Il Triangolo del Fuoco</h3>
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 400 300" width="100%" height="250">
+                            <!-- Triangolo -->
+                            <polygon points="200,30 50,250 350,250" fill="none" stroke="#e74c3c" stroke-width="3"/>
+                            
+                            <!-- Combustibile -->
+                            <circle cx="200" cy="50" r="40" fill="#f39c12" opacity="0.3"/>
+                            <text x="200" y="45" text-anchor="middle" fill="#2c3e50" font-size="11" font-weight="bold">COMBUSTIBILE</text>
+                            <text x="200" y="60" text-anchor="middle" fill="#7f8c8d" font-size="9">(Cherosene)</text>
+                            
+                            <!-- Comburente -->
+                            <circle cx="70" cy="230" r="40" fill="#3498db" opacity="0.3"/>
+                            <text x="70" y="225" text-anchor="middle" fill="#2c3e50" font-size="11" font-weight="bold">COMBURENTE</text>
+                            <text x="70" y="240" text-anchor="middle" fill="#7f8c8d" font-size="9">(Aria compressa)</text>
+                            
+                            <!-- Innesco -->
+                            <circle cx="330" cy="230" r="40" fill="#e74c3c" opacity="0.3"/>
+                            <text x="330" y="225" text-anchor="middle" fill="#2c3e50" font-size="11" font-weight="bold">INNESCO</text>
+                            <text x="330" y="240" text-anchor="middle" fill="#7f8c8d" font-size="9">(Accensione)</text>
+                            
+                            <!-- Fiamma centrale -->
+                            <path d="M200 160 Q180 130 190 100 Q200 120 210 100 Q220 130 200 160" fill="#e74c3c" opacity="0.8"/>
+                            <text x="200" y="180" text-anchor="middle" fill="#e74c3c" font-size="12" font-weight="bold">COMBUSTIONE</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Reazione Chimica Generale</h3>
+                    <div class="formula-box">
+                        <p><strong>Combustione ideale del cherosene (approssimato come n-decano C₁₀H₂₂):</strong></p>
+                        <p class="formula">C₁₀H₂₂ + 15.5 O₂ → 10 CO₂ + 11 H₂O + Energia</p>
+                        <p class="description">La combustione ideale produce solo CO₂ e H₂O. La combustione reale genera anche NOₓ, particolato e idrocarburi incombusti.</p>
+                    </div>
+                    <div class="formula-box">
+                        <p><strong>Formula generale:</strong></p>
+                        <p class="formula">CₓHᵧ + O₂ → CO₂ + H₂O + energia</p>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Trasformazione Energetica</h3>
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 500 100" width="100%" height="80">
+                            <!-- Energia Chimica -->
+                            <rect x="10" y="30" width="100" height="40" rx="5" fill="#9b59b6" opacity="0.3" stroke="#9b59b6" stroke-width="2"/>
+                            <text x="60" y="55" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">ENERGIA</text>
+                            <text x="60" y="67" text-anchor="middle" fill="#2c3e50" font-size="9">CHIMICA</text>
+                            
+                            <path d="M110 50 L140 50" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow2)"/>
+                            
+                            <!-- Energia Termica -->
+                            <rect x="140" y="30" width="100" height="40" rx="5" fill="#e74c3c" opacity="0.3" stroke="#e74c3c" stroke-width="2"/>
+                            <text x="190" y="55" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">ENERGIA</text>
+                            <text x="190" y="67" text-anchor="middle" fill="#2c3e50" font-size="9">TERMICA</text>
+                            
+                            <path d="M240 50 L270 50" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow2)"/>
+                            
+                            <!-- Energia Meccanica -->
+                            <rect x="270" y="30" width="100" height="40" rx="5" fill="#3498db" opacity="0.3" stroke="#3498db" stroke-width="2"/>
+                            <text x="320" y="55" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">ENERGIA</text>
+                            <text x="320" y="67" text-anchor="middle" fill="#2c3e50" font-size="9">MECCANICA</text>
+                            
+                            <path d="M370 50 L400 50" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow2)"/>
+                            
+                            <!-- Spinta -->
+                            <rect x="400" y="30" width="90" height="40" rx="5" fill="#27ae60" opacity="0.3" stroke="#27ae60" stroke-width="2"/>
+                            <text x="445" y="55" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">SPINTA</text>
+                            
+                            <defs>
+                                <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <path d="M0,0 L0,6 L9,3 z" fill="#2c3e50"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Combustione Completa vs Incompleta</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Caratteristica</th>
+                                <th>Completa (Ideale)</th>
+                                <th>Incompleta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Ossigeno</td>
+                                <td>Sufficiente</td>
+                                <td>In difetto</td>
+                            </tr>
+                            <tr>
+                                <td>Prodotti</td>
+                                <td>CO₂ + H₂O</td>
+                                <td>CO + fuliggine</td>
+                            </tr>
+                            <tr>
+                                <td>Energia</td>
+                                <td>Massima</td>
+                                <td>Ridotta</td>
+                            </tr>
+                            <tr>
+                                <td>Emissioni</td>
+                                <td>Minime</td>
+                                <td>Inquinanti</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="example-box">
+                    <h5>📌 Esempio Pratico: Temperature in Camera</h5>
+                    <p>Nella camera di combustione di un turbofan moderno:</p>
+                    <ul>
+                        <li><strong>Temperatura di fiamma:</strong> 1600-2000°C</li>
+                        <li><strong>Temperatura all'uscita:</strong> 1300-1400°C (limite materiali turbina)</li>
+                        <li><strong>Aria in eccesso:</strong> φ = 2.5-3.5 (rapporto di equivalenza)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Camera di Combustione -->
+    <div class="modal-overlay" id="modal4">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="close-btn" onclick="closeModal('modal4')">×</button>
+                <h2>4. Camera di Combustione del Turbofan</h2>
+                <p>Componenti, zone e fenomeni da controllare</p>
+            </div>
+            <div class="modal-content">
+                <div class="modal-section">
+                    <h3>Ruolo della Camera di Combustione</h3>
+                    <p>Il ruolo del combustore è garantire il necessario innalzamento della temperatura dei gas evolventi, prima che questi vengano inviati ad espandere in turbina, mediante il calore liberato dalle reazioni di ossidazione del combustibile.</p>
+                    <p>La temperatura non può superare i limiti imposti dalla resistenza dei materiali della turbina (<strong>circa 1300-1400°C</strong>).</p>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Componenti Principali</h3>
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 600 250" width="100%" height="220">
+                            <!-- Camera outline -->
+                            <path d="M50 80 L100 60 L500 60 L550 80 L550 170 L500 190 L100 190 L50 170 Z" fill="#ecf0f1" stroke="#2c3e50" stroke-width="2"/>
+                            
+                            <!-- Diffusore -->
+                            <rect x="60" y="90" width="60" height="70" fill="#3498db" opacity="0.4" stroke="#3498db" stroke-width="2"/>
+                            <text x="90" y="130" text-anchor="middle" fill="#2c3e50" font-size="9" font-weight="bold">1</text>
+                            
+                            <!-- Liner -->
+                            <path d="M130 100 L480 100 L480 150 L130 150 Z" fill="#9b59b6" opacity="0.2" stroke="#9b59b6" stroke-width="2" stroke-dasharray="5,3"/>
+                            <text x="160" y="130" text-anchor="middle" fill="#2c3e50" font-size="9" font-weight="bold">2</text>
+                            
+                            <!-- Swirler -->
+                            <circle cx="180" cy="125" r="15" fill="#e67e22" opacity="0.5" stroke="#e67e22" stroke-width="2"/>
+                            <text x="180" y="130" text-anchor="middle" fill="#fff" font-size="9" font-weight="bold">3</text>
+                            
+                            <!-- Iniettore -->
+                            <rect x="200" y="105" width="30" height="40" fill="#e74c3c" opacity="0.5" stroke="#e74c3c" stroke-width="2"/>
+                            <text x="215" y="130" text-anchor="middle" fill="#fff" font-size="9" font-weight="bold">4</text>
+                            
+                            <!-- Fori -->
+                            <circle cx="280" cy="100" r="5" fill="#27ae60"/>
+                            <circle cx="320" cy="100" r="5" fill="#27ae60"/>
+                            <circle cx="360" cy="100" r="5" fill="#27ae60"/>
+                            <circle cx="280" cy="150" r="5" fill="#27ae60"/>
+                            <circle cx="320" cy="150" r="5" fill="#27ae60"/>
+                            <circle cx="360" cy="150" r="5" fill="#27ae60"/>
+                            <text x="320" y="170" text-anchor="middle" fill="#27ae60" font-size="9" font-weight="bold">5</text>
+                            
+                            <!-- Raffreddamento -->
+                            <path d="M420 70 L420 90 M430 70 L430 90 M440 70 L440 90" stroke="#3498db" stroke-width="2"/>
+                            <path d="M420 160 L420 180 M430 160 L430 180 M440 160 L440 180" stroke="#3498db" stroke-width="2"/>
+                            <text x="430" y="200" text-anchor="middle" fill="#3498db" font-size="9" font-weight="bold">6</text>
+                            
+                            <!-- Legenda -->
+                            <text x="90" y="220" text-anchor="middle" fill="#2c3e50" font-size="8">1. Diffusore</text>
+                            <text x="180" y="220" text-anchor="middle" fill="#2c3e50" font-size="8">2. Liner</text>
+                            <text x="260" y="220" text-anchor="middle" fill="#2c3e50" font-size="8">3. Swirler</text>
+                            <text x="340" y="220" text-anchor="middle" fill="#2c3e50" font-size="8">4. Iniettore</text>
+                            <text x="420" y="220" text-anchor="middle" fill="#2c3e50" font-size="8">5. Fori</text>
+                            <text x="500" y="220" text-anchor="middle" fill="#2c3e50" font-size="8">6. Raffredd.</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Le Tre Zone della Camera</h3>
+                    <div class="info-grid">
+                        <div class="info-item" style="background: linear-gradient(135deg, #ffebee, #ffcdd2);">
+                            <div class="label" style="color: #c62828;">ZONA PRIMARIA</div>
+                            <div class="value" style="color: #c62828;">φ ≈ 0.9 - 1.0</div>
+                            <p style="font-size: 0.8rem; margin-top: 5px;">Avvio e stabilità fiamma. Miscela prossima alla stechiometrica.</p>
+                        </div>
+                        <div class="info-item" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
+                            <div class="label" style="color: #e65100;">ZONA INTERMEDIA</div>
+                            <div class="value" style="color: #e65100;">φ ≈ 0.5 - 0.8</div>
+                            <p style="font-size: 0.8rem; margin-top: 5px;">Completamento combustione. Ossidazione CO e HC.</p>
+                        </div>
+                        <div class="info-item" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
+                            <div class="label" style="color: #1565c0;">ZONA DI DILUIZIONE</div>
+                            <div class="value" style="color: #1565c0;">φ ≈ 2.5 - 3.5</div>
+                            <p style="font-size: 0.8rem; margin-top: 5px;">Abbassamento temperatura per limiti turbina.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Fenomeni da Evitare</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Fenomeno</th>
+                                <th>Causa</th>
+                                <th>Conseguenza</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong style="color: #e74c3c;">BLOWOUT</strong></td>
+                                <td>Velocità aria troppo alta</td>
+                                <td>La fiamma si spegne</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color: #f39c12;">FLASHBACK</strong></td>
+                                <td>Velocità aria troppo bassa</td>
+                                <td>Fiamma si propaga a monte, danneggia componenti</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="formula-box">
+                    <p><strong>Perdite di carico nel combustore:</strong></p>
+                    <p class="formula">Perdita% = (P₀,IN - P₀,OUT) / P₀,IN × 100</p>
+                    <p class="description">Le perdite di carico sono proporzionali al quadrato della velocità. Per v ≈ 150 m/s si può perdere fino al 10% del salto di pressione del compressore.</p>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Tipologie di Camere</h3>
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 500 150" width="100%" height="130">
+                            <!-- Tubolare -->
+                            <rect x="20" y="40" width="100" height="60" rx="30" fill="#3498db" opacity="0.3" stroke="#3498db" stroke-width="2"/>
+                            <text x="70" y="75" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">TUBOLARE</text>
+                            <text x="70" y="120" text-anchor="middle" fill="#7f8c8d" font-size="8">Industriale</text>
+                            
+                            <!-- Multican -->
+                            <g transform="translate(180, 40)">
+                                <circle cx="20" cy="30" r="15" fill="#e67e22" opacity="0.3" stroke="#e67e22" stroke-width="2"/>
+                                <circle cx="50" cy="30" r="15" fill="#e67e22" opacity="0.3" stroke="#e67e22" stroke-width="2"/>
+                                <circle cx="80" cy="30" r="15" fill="#e67e22" opacity="0.3" stroke="#e67e22" stroke-width="2"/>
+                            </g>
+                            <text x="230" y="120" text-anchor="middle" fill="#7f8c8d" font-size="8">MULTICAN</text>
+                            
+                            <!-- Anulare -->
+                            <ellipse cx="400" cy="70" rx="60" ry="30" fill="none" stroke="#27ae60" stroke-width="2"/>
+                            <ellipse cx="400" cy="70" rx="30" ry="15" fill="#27ae60" opacity="0.3" stroke="#27ae60" stroke-width="2"/>
+                            <text x="400" y="75" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">ANULARE</text>
+                            <text x="400" y="120" text-anchor="middle" fill="#7f8c8d" font-size="8">Standard moderno</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h5>📌 Esempio Pratico: Rendimento di Combustione</h5>
+                    <p>Nei moderni motori aeronautici il <strong>rendimento di combustione (ηb)</strong> è superiore al <strong>98-99%</strong>.</p>
+                    <p>Formula: ηb = (Aumento reale entalpia) / (Calore teorico disponibile)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: Ciclo Brayton -->
+    <div class="modal-overlay" id="modal5">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="close-btn" onclick="closeModal('modal5')">×</button>
+                <h2>5. Motore Turbofan: Funzionamento</h2>
+                <p>Il Ciclo Brayton-Joule e la legge dei gas perfetti</p>
+            </div>
+            <div class="modal-content">
+                <div class="modal-section">
+                    <h3>Schema del Motore Turbofan</h3>
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 600 200" width="100%" height="180">
+                            <!-- Ingresso aria -->
+                            <ellipse cx="50" cy="100" rx="30" ry="60" fill="#3498db" opacity="0.2" stroke="#3498db" stroke-width="2"/>
+                            <text x="50" y="95" text-anchor="middle" fill="#2c3e50" font-size="9" font-weight="bold">1</text>
+                            <text x="50" y="170" text-anchor="middle" fill="#2c3e50" font-size="8">INGRESSO</text>
+                            
+                            <!-- Fan -->
+                            <ellipse cx="100" cy="100" rx="20" ry="50" fill="#1abc9c" opacity="0.3" stroke="#1abc9c" stroke-width="2"/>
+                            <line x1="100" y1="50" x2="100" y2="150" stroke="#1abc9c" stroke-width="2"/>
+                            <text x="100" y="105" text-anchor="middle" fill="#2c3e50" font-size="9" font-weight="bold">2</text>
+                            <text x="100" y="170" text-anchor="middle" fill="#2c3e50" font-size="8">FAN</text>
+                            
+                            <!-- Compressore -->
+                            <rect x="140" y="60" width="80" height="80" fill="#9b59b6" opacity="0.2" stroke="#9b59b6" stroke-width="2"/>
+                            <text x="180" y="105" text-anchor="middle" fill="#2c3e50" font-size="9" font-weight="bold">3</text>
+                            <text x="180" y="170" text-anchor="middle" fill="#2c3e50" font-size="8">COMPR.</text>
+                            
+                            <!-- Camera combustione -->
+                            <rect x="240" y="70" width="100" height="60" rx="10" fill="#e74c3c" opacity="0.3" stroke="#e74c3c" stroke-width="2"/>
+                            <path d="M290 90 Q280 80 285 70 Q295 85 305 70 Q310 80 300 90" fill="#f39c12"/>
+                            <text x="290" y="115" text-anchor="middle" fill="#2c3e50" font-size="9" font-weight="bold">4</text>
+                            <text x="290" y="170" text-anchor="middle" fill="#2c3e50" font-size="8">CAMERA</text>
+                            
+                            <!-- Turbina -->
+                            <rect x="360" y="60" width="80" height="80" fill="#f39c12" opacity="0.2" stroke="#f39c12" stroke-width="2"/>
+                            <text x="400" y="105" text-anchor="middle" fill="#2c3e50" font-size="9" font-weight="bold">5</text>
+                            <text x="400" y="170" text-anchor="middle" fill="#2c3e50" font-size="8">TURBINA</text>
+                            
+                            <!-- Ugello -->
+                            <polygon points="460,70 520,85 520,115 460,130" fill="#27ae60" opacity="0.2" stroke="#27ae60" stroke-width="2"/>
+                            <text x="490" y="105" text-anchor="middle" fill="#2c3e50" font-size="9" font-weight="bold">6</text>
+                            <text x="490" y="170" text-anchor="middle" fill="#2c3e50" font-size="8">UGELLO</text>
+                            
+                            <!-- Spinta -->
+                            <path d="M520 100 L570 100" stroke="#e74c3c" stroke-width="4" marker-end="url(#arrow3)"/>
+                            <text x="560" y="90" fill="#e74c3c" font-size="10" font-weight="bold">SPINTA</text>
+                            
+                            <!-- Flusso bypass -->
+                            <path d="M120 60 Q200 30 480 60" fill="none" stroke="#3498db" stroke-width="2" stroke-dasharray="5,3"/>
+                            <text x="300" y="25" text-anchor="middle" fill="#3498db" font-size="9">FLUSSO BYPASS</text>
+                            
+                            <!-- Flusso core -->
+                            <path d="M120 140 Q200 160 480 140" fill="none" stroke="#e67e22" stroke-width="2" stroke-dasharray="5,3"/>
+                            <text x="300" y="155" text-anchor="middle" fill="#e67e22" font-size="9">FLUSSO CORE</text>
+                            
+                            <defs>
+                                <marker id="arrow3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <path d="M0,0 L0,6 L9,3 z" fill="#e74c3c"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Ciclo Termodinamico Brayton-Joule</h3>
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 400 300" width="100%" height="250">
+                            <!-- Assi -->
+                            <line x1="50" y1="250" x2="350" y2="250" stroke="#2c3e50" stroke-width="2"/>
+                            <line x1="50" y1="250" x2="50" y2="50" stroke="#2c3e50" stroke-width="2"/>
+                            <text x="360" y="255" fill="#2c3e50" font-size="12">V (volume)</text>
+                            <text x="30" y="45" fill="#2c3e50" font-size="12">P</text>
+                            
+                            <!-- Punti del ciclo -->
+                            <circle cx="100" cy="200" r="8" fill="#3498db"/>
+                            <text x="85" y="220" fill="#3498db" font-size="12" font-weight="bold">1</text>
+                            
+                            <circle cx="150" cy="100" r="8" fill="#9b59b6"/>
+                            <text x="160" y="95" fill="#9b59b6" font-size="12" font-weight="bold">2</text>
+                            
+                            <circle cx="280" cy="100" r="8" fill="#e74c3c"/>
+                            <text x="290" y="95" fill="#e74c3c" font-size="12" font-weight="bold">3</text>
+                            
+                            <circle cx="300" cy="180" r="8" fill="#f39c12"/>
+                            <text x="310" y="195" fill="#f39c12" font-size="12" font-weight="bold">4</text>
+                            
+                            <!-- Trasformazioni -->
+                            <!-- 1-2 Compressione isoentropica -->
+                            <path d="M100 200 Q110 150 150 100" fill="none" stroke="#3498db" stroke-width="3"/>
+                            
+                            <!-- 2-3 Aggiunta calore isobara -->
+                            <line x1="150" y1="100" x2="280" y2="100" stroke="#e74c3c" stroke-width="3"/>
+                            
+                            <!-- 3-4 Espansione isoentropica -->
+                            <path d="M280 100 Q290 140 300 180" fill="none" stroke="#f39c12" stroke-width="3"/>
+                            
+                            <!-- 4-1 Espulsione calore isobara -->
+                            <line x1="300" y1="180" x2="100" y2="200" stroke="#27ae60" stroke-width="3" stroke-dasharray="5,3"/>
+                            
+                            <!-- Legenda -->
+                            <rect x="50" y="260" width="300" height="35" fill="#f5f5f5" rx="5"/>
+                            <text x="60" y="278" fill="#3498db" font-size="9">1-2: Compressione</text>
+                            <text x="150" y="278" fill="#e74c3c" font-size="9">2-3: Combustione</text>
+                            <text x="60" y="290" fill="#f39c12" font-size="9">3-4: Espansione</text>
+                            <text x="150" y="290" fill="#27ae60" font-size="9">4-1: Scarico</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Legge dei Gas Perfetti</h3>
+                    <div class="formula-box">
+                        <p><strong>Equazione di stato dei gas ideali:</strong></p>
+                        <p class="formula">PV = nRT</p>
+                        <p class="description">
+                            P = Pressione [Pa]<br>
+                            V = Volume [m³]<br>
+                            n = Numero di moli [mol]<br>
+                            R = Costante universale dei gas = 8.314 J/(mol·K)<br>
+                            T = Temperatura [K]
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Calcolatore Interattivo -->
+                <div class="calculator-section">
+                    <h4>🔧 Calcolatore Interattivo - Ciclo Brayton</h4>
+                    <p>Modifica i parametri per calcolare il rendimento del ciclo e verificare la legge dei gas perfetti.</p>
+                    
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label>Temperatura ingresso T₁ [K]</label>
+                            <input type="number" id="T1" value="288" min="200" max="400">
+                        </div>
+                        <div class="input-field">
+                            <label>Rapporto di compressione β</label>
+                            <input type="number" id="beta" value="15" min="5" max="40" step="1">
+                        </div>
+                        <div class="input-field">
+                            <label>Temperatura max T₃ [K]</label>
+                            <input type="number" id="T3" value="1400" min="800" max="2000">
+                        </div>
+                        <div class="input-field">
+                            <label>γ (cp/cv)</label>
+                            <input type="number" id="gamma" value="1.4" min="1.2" max="1.7" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <button class="calc-btn" onclick="calculateBrayton()">Calcola Ciclo Brayton</button>
+                    
+                    <div class="results-grid" id="resultsGrid" style="display: none;">
+                        <div class="result-item">
+                            <div class="label">T₂ dopo compressione</div>
+                            <div class="value" id="resultT2">-</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">T₄ dopo espansione</div>
+                            <div class="value" id="resultT4">-</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Rendimento η</div>
+                            <div class="value" id="resultEta">-</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Lavoro specifico</div>
+                            <div class="value" id="resultWork">-</div>
+                        </div>
+                    </div>
+                    
+                    <div id="gasLawDemo" style="margin-top: 20px; display: none;">
+                        <h5>Verifica PV = nRT</h5>
+                        <p id="gasLawResult"></p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h5>📌 Esempio Pratico: CFM56-7B (Boeing 737)</h5>
+                    <ul>
+                        <li><strong>Rapporto di compressione:</strong> 32.8:1</li>
+                        <li><strong>Bypass ratio:</strong> 5.1:1</li>
+                        <li><strong>Spinta massima:</strong> 121 kN</li>
+                        <li><strong>Consumo specifico:</strong> 0.37 lb/(lbf·h)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 6: Impiego e Vantaggi -->
+    <div class="modal-overlay" id="modal6">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="close-btn" onclick="closeModal('modal6')">×</button>
+                <h2>6. Impiego Aeronautico e Vantaggi</h2>
+                <p>Applicazioni reali e benefici del motore turbofan</p>
+            </div>
+            <div class="modal-content">
+                <div class="modal-section">
+                    <h3>Perché il Turbofan?</h3>
+                    <p>Il <strong>turbofan</strong> è il motore principale nell'aviazione civile moderna. È ideale per voli a medio e lungo raggio grazie alla sua elevata efficienza propulsiva, che deriva dalla combinazione di un flusso di bypass (freddo) e un flusso core (caldo).</p>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Esempi di Utilizzo</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="label">Boeing 737</div>
+                            <div class="value">CFM56</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Airbus A320</div>
+                            <div class="value">CFM LEAP / PW1100G</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Boeing 787</div>
+                            <div class="value">GEnx / Trent 1000</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Airbus A350</div>
+                            <div class="value">Trent XWB</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Vantaggi del Turbofan</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Vantaggio</th>
+                                <th>Descrizione</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>✅ <strong>Elevata efficienza propulsiva</strong></td>
+                                <td>Il bypass ratio alto aumenta la massa d'aria accelerata riducendo il consumo</td>
+                            </tr>
+                            <tr>
+                                <td>✅ <strong>Minori consumi di carburante</strong></td>
+                                <td>Fino al 25% in meno rispetto ai turbojet puri</td>
+                            </tr>
+                            <tr>
+                                <td>✅ <strong>Riduzione della rumorosità</strong></td>
+                                <td>Il flusso bypass freddo avvolge quello caldo, riducendo il rumore</td>
+                            </tr>
+                            <tr>
+                                <td>✅ <strong>Maggiore affidabilità</strong></td>
+                                <td>Design maturo con MTBF superiori a 20.000 ore</td>
+                            </tr>
+                            <tr>
+                                <td>✅ <strong>Minori emissioni inquinanti</strong></td>
+                                <td>Combustione più efficiente = meno NOₓ e particolato</td>
+                            </tr>
+                            <tr>
+                                <td>✅ <strong>Maggiore spinta grazie al bypass</strong></td>
+                                <td>Accelerazione di grandi masse d'aria a velocità moderate</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Flusso Bypass vs Flusso Core</h3>
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 500 200" width="100%" height="180">
+                            <!-- Engine outline -->
+                            <ellipse cx="80" cy="100" rx="60" ry="80" fill="#ecf0f1" stroke="#2c3e50" stroke-width="2"/>
+                            <rect x="140" y="40" width="200" height="120" fill="#ecf0f1" stroke="#2c3e50" stroke-width="2"/>
+                            <polygon points="340,40 420,60 420,140 340,160" fill="#ecf0f1" stroke="#2c3e50" stroke-width="2"/>
+                            
+                            <!-- Bypass flow -->
+                            <path d="M100 40 Q200 20 400 50" fill="none" stroke="#3498db" stroke-width="8" opacity="0.5"/>
+                            <path d="M100 160 Q200 180 400 150" fill="none" stroke="#3498db" stroke-width="8" opacity="0.5"/>
+                            <text x="250" y="15" text-anchor="middle" fill="#3498db" font-size="12" font-weight="bold">FLUSSO BYPASS (freddo)</text>
+                            <text x="250" y="195" text-anchor="middle" fill="#3498db" font-size="11">~80% della massa totale</text>
+                            
+                            <!-- Core flow -->
+                            <path d="M140 100 L340 100" stroke="#e74c3c" stroke-width="15" opacity="0.5"/>
+                            <text x="240" y="105" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">CORE (caldo)</text>
+                            
+                            <!-- Exhaust -->
+                            <ellipse cx="440" cy="100" rx="30" ry="50" fill="#f39c12" opacity="0.3"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="formula-box">
+                    <p><strong>Bypass Ratio (BPR):</strong></p>
+                    <p class="formula">BPR = ṁ_bypass / ṁ_core</p>
+                    <p class="description">Nei turbofan moderni ad alto bypass: BPR = 8-12:1 (es. GEnx: 9.6:1)</p>
+                </div>
+
+                <div class="example-box">
+                    <h5>📌 Esempio Pratico: Confronto Consumi</h5>
+                    <p>Per un volo Roma-New York (~7000 km):</p>
+                    <ul>
+                        <li><strong>Boeing 787 (GEnx):</strong> ~55.000 litri di Jet A-1</li>
+                        <li><strong>Consumo specifico:</strong> ~2.5 litri/100 km per passeggero</li>
+                        <li><strong>Risparmio vs generazione precedente:</strong> ~20%</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 7: Conclusione -->
+    <div class="modal-overlay" id="modal7">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="close-btn" onclick="closeModal('modal7')">×</button>
+                <h2>7. Conclusione</h2>
+                <p>L'integrazione dei sistemi per il volo moderno</p>
+            </div>
+            <div class="modal-content">
+                <div class="modal-section">
+                    <h3>Sintesi del Sistema</h3>
+                    <p>Il <strong>motore turbofan</strong> rappresenta oggi il sistema propulsivo più utilizzato nell'aviazione civile grazie all'integrazione ottimale tra:</p>
+                    <ul class="styled-list">
+                        <li><strong>Impianto combustibile</strong> - Stoccaggio e distribuzione efficiente del carburante</li>
+                        <li><strong>Combustione controllata</strong> - Reazione chimica ottimizzata per massima efficienza</li>
+                        <li><strong>Camera di combustione avanzata</strong> - Design moderno per basse emissioni e alta affidabilità</li>
+                        <li><strong>Elevata efficienza termodinamica</strong> - Ciclo Brayton ottimizzato</li>
+                    </ul>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Riepilogo delle Trasformazioni</h3>
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 600 150" width="100%" height="130">
+                            <!-- Combustibile -->
+                            <rect x="20" y="50" width="80" height="50" rx="10" fill="#f39c12" opacity="0.3" stroke="#f39c12" stroke-width="2"/>
+                            <text x="60" y="80" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">Jet A-1</text>
+                            
+                            <path d="M100 75 L140 75" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow4)"/>
+                            
+                            <!-- Combustione -->
+                            <rect x="140" y="50" width="100" height="50" rx="10" fill="#e74c3c" opacity="0.3" stroke="#e74c3c" stroke-width="2"/>
+                            <text x="190" y="75" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">Combustione</text>
+                            <text x="190" y="88" text-anchor="middle" fill="#7f8c8d" font-size="8">1600-2000°C</text>
+                            
+                            <path d="M240 75 L280 75" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow4)"/>
+                            
+                            <!-- Espansione -->
+                            <rect x="280" y="50" width="100" height="50" rx="10" fill="#9b59b6" opacity="0.3" stroke="#9b59b6" stroke-width="2"/>
+                            <text x="330" y="75" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">Espansione</text>
+                            <text x="330" y="88" text-anchor="middle" fill="#7f8c8d" font-size="8">Turbina</text>
+                            
+                            <path d="M380 75 L420 75" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow4)"/>
+                            
+                            <!-- Spinta -->
+                            <rect x="420" y="50" width="80" height="50" rx="10" fill="#27ae60" opacity="0.3" stroke="#27ae60" stroke-width="2"/>
+                            <text x="460" y="80" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">SPINTA</text>
+                            
+                            <path d="M500 75 L560 75" stroke="#27ae60" stroke-width="4" marker-end="url(#arrow4)"/>
+                            <text x="560" y="95" fill="#27ae60" font-size="10">✈</text>
+                            
+                            <defs>
+                                <marker id="arrow4" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <path d="M0,0 L0,6 L9,3 z" fill="#2c3e50"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Il Futuro dell'Aviazione</h3>
+                    <div class="info-grid">
+                        <div class="info-item" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
+                            <div class="label" style="color: #2e7d32;">SAF</div>
+                            <div class="value" style="color: #2e7d32;">-80% CO₂</div>
+                            <p style="font-size: 0.8rem;">Sustainable Aviation Fuel</p>
+                        </div>
+                        <div class="info-item" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
+                            <div class="label" style="color: #1565c0;">Idrogeno</div>
+                            <div class="value" style="color: #1565c0;">0 CO₂</div>
+                            <p style="font-size: 0.8rem;">Ricerca in corso</p>
+                        </div>
+                        <div class="info-item" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
+                            <div class="label" style="color: #e65100;">Elettrico</div>
+                            <div class="value" style="color: #e65100;">Ibrido</div>
+                            <p style="font-size: 0.8rem;">Corto raggio</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Caratteristiche Richieste - Riepilogo</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Requisito</th>
+                                <th>Importanza</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>Efficienza di combustione</td><td>⭐⭐⭐⭐⭐</td></tr>
+                            <tr><td>2</td><td>Accensione controllata e affidabile</td><td>⭐⭐⭐⭐⭐</td></tr>
+                            <tr><td>3</td><td>Ampi limiti di stabilità</td><td>⭐⭐⭐⭐</td></tr>
+                            <tr><td>4</td><td>Assenza di pulsazioni</td><td>⭐⭐⭐⭐</td></tr>
+                            <tr><td>5</td><td>Distribuzione temperatura uniforme</td><td>⭐⭐⭐⭐⭐</td></tr>
+                            <tr><td>6</td><td>Basse emissioni</td><td>⭐⭐⭐⭐⭐</td></tr>
+                            <tr><td>7</td><td>Basso costo e manutenzione</td><td>⭐⭐⭐</td></tr>
+                            <tr><td>8</td><td>Dimensioni compatte</td><td>⭐⭐⭐⭐ (aeronautico)</td></tr>
+                            <tr><td>9</td><td>Lunga durata</td><td>⭐⭐⭐⭐ (industriale)</td></tr>
+                            <tr><td>10</td><td>Multi-combustibile</td><td>⭐⭐⭐ (industriale)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="example-box">
+                    <h5>📌 Conclusione</h5>
+                    <p>L'aviazione moderna è il risultato di decenni di ricerca e sviluppo. La comprensione dei principi di combustione, termodinamica e fluidodinamica è fondamentale per:</p>
+                    <ul>
+                        <li>Progettare motori sempre più efficienti</li>
+                        <li>Ridurre l'impatto ambientale del trasporto aereo</li>
+                        <li>Garantire sicurezza e affidabilità</li>
+                        <li>Preparare il terreno per i combustibili del futuro</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal functionality
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', function() {
+                const modalId = this.getAttribute('data-modal');
+                openModal(modalId);
+            });
+        });
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Progress bar on scroll
+        window.addEventListener('scroll', function() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        });
+
+        // Brayton Cycle Calculator
+        function calculateBrayton() {
+            const T1 = parseFloat(document.getElementById('T1').value);
+            const beta = parseFloat(document.getElementById('beta').value);
+            const T3 = parseFloat(document.getElementById('T3').value);
+            const gamma = parseFloat(document.getElementById('gamma').value);
+            
+            // Cp for air (approximately)
+            const cp = 1005; // J/(kg·K)
+            
+            // Calculate T2 after isentropic compression
+            // T2/T1 = β^((γ-1)/γ)
+            const exponent = (gamma - 1) / gamma;
+            const T2 = T1 * Math.pow(beta, exponent);
+            
+            // Calculate T4 after isentropic expansion
+            // T4/T3 = (1/β)^((γ-1)/γ) = β^(-(γ-1)/γ)
+            const T4 = T3 * Math.pow(beta, -exponent);
+            
+            // Thermal efficiency
+            // η = 1 - 1/β^((γ-1)/γ) = 1 - T1/T2
+            const eta = 1 - Math.pow(beta, -exponent);
+            
+            // Specific work output
+            // W = cp * [(T3 - T4) - (T2 - T1)]
+            const work = cp * ((T3 - T4) - (T2 - T1));
+            
+            // Display results
+            document.getElementById('resultT2').textContent = T2.toFixed(1) + ' K';
+            document.getElementById('resultT4').textContent = T4.toFixed(1) + ' K';
+            document.getElementById('resultEta').textContent = (eta * 100).toFixed(1) + '%';
+            document.getElementById('resultWork').textContent = (work / 1000).toFixed(1) + ' kJ/kg';
+            
+            document.getElementById('resultsGrid').style.display = 'grid';
+            
+            // Gas Law Demonstration
+            const R = 8.314; // J/(mol·K)
+            const n = 1; // 1 mole
+            const P1 = 101325; // Pa (sea level)
+            const V1 = (n * R * T1) / P1;
+            const P2 = P1 * beta;
+            const V2 = (n * R * T2) / P2;
+            
+            document.getElementById('gasLawResult').innerHTML = `
+                <strong>Stato 1 (ingresso):</strong><br>
+                P₁ = ${(P1/1000).toFixed(1)} kPa, V₁ = ${(V1*1000).toFixed(2)} L, T₁ = ${T1} K<br>
+                Verifica: PV = ${(P1*V1).toFixed(1)} J, nRT = ${(n*R*T1).toFixed(1)} J ✓<br><br>
+                <strong>Stato 2 (dopo compressione):</strong><br>
+                P₂ = ${(P2/1000).toFixed(1)} kPa, V₂ = ${(V2*1000).toFixed(2)} L, T₂ = ${T2.toFixed(1)} K<br>
+                Verifica: PV = ${(P2*V2).toFixed(1)} J, nRT = ${(n*R*T2).toFixed(1)} J ✓
+            `;
+            document.getElementById('gasLawDemo').style.display = 'block';
+        }
+
+        // Animate cards on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
